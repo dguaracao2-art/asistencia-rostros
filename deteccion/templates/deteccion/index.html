@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Control de asistencia por rostros</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: system-ui, Arial, sans-serif;
+      background: #0f172a;
+      color: #e2e8f0;
+      margin: 0;
+      padding: 24px;
+    }
+    .contenedor { max-width: 960px; margin: 0 auto; }
+    h1 { font-size: 24px; margin-bottom: 4px; }
+    .subtitulo { color: #94a3b8; font-size: 14px; margin-top: 0; }
+    .panel {
+      background: #1e293b;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+        #video {
+      width: 100%;
+      max-height: 420px;
+      object-fit: cover;
+      border-radius: 8px;
+      display: block;
+      background: #000;
+    }
+    form { display: flex; gap: 10px; margin-top: 16px; }
+    input[type="text"] {
+      flex: 1;
+      padding: 12px;
+      font-size: 15px;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      background: #0f172a;
+      color: #e2e8f0;
+    }
+    button {
+      padding: 12px 24px;
+      font-size: 15px;
+      font-weight: 600;
+      background: #2563eb;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    button:hover { background: #1d4ed8; }
+    button:disabled { background: #475569; cursor: not-allowed; }
+    #mensaje { min-height: 24px; margin-top: 12px; font-weight: 600; font-size: 14px; }
+    .ok { color: #4ade80; }
+    .error { color: #f87171; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th, td { padding: 10px; text-align: left; border-bottom: 1px solid #334155; }
+    th { color: #94a3b8; font-weight: 600; text-transform: uppercase; font-size: 12px; }
+    .contador {
+      display: inline-block;
+      background: #2563eb;
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <div class="contenedor">
+    <h1>Control de asistencia por detección de rostros</h1>
+        <p class="subtitulo">Registro automático de asistencia mediante visión por computadora</p>
+
+    <div class="panel">
+      <img id="video" src="{% url 'video_feed' %}" alt="Video en tiempo real">
+
+      <form id="form-asistencia">
+        {% csrf_token %}
+        <input type="text" id="nombre" placeholder="Nombre del estudiante" autocomplete="off" required>
+        <button type="submit" id="btn">Registrar asistencia</button>
+      </form>
+      <p id="mensaje"></p>
+    </div>
+
+    <div class="panel">
+      <h2 style="font-size:18px; margin-top:0;">
+        Registros recientes <span class="contador">{{ total_hoy }} hoy</span>
+      </h2>
+      <table>
+        <tr>
+          <th>Nombre</th><th>Fecha</th><th>Hora</th><th>Rostros</th>
+        </tr>
+        {% for a in registros %}
+        <tr>
+          <td>{{ a.nombre }}</td>
+          <td>{{ a.fecha|date:"d/m/Y" }}</td>
+          <td>{{ a.hora|time:"H:i:s" }}</td>
+          <td>{{ a.rostros_detectados }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="4" style="color:#94a3b8;">Sin registros todavía.</td></tr>
+        {% endfor %}
+      </table>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById('form-asistencia');
+    const mensaje = document.getElementById('mensaje');
+    const btn = document.getElementById('btn');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      btn.disabled = true;
+      mensaje.textContent = 'Analizando...';
+      mensaje.className = '';
+
+      const datos = new FormData();
+      datos.append('nombre', document.getElementById('nombre').value);
+      datos.append('csrfmiddlewaretoken',
+        document.querySelector('[name=csrfmiddlewaretoken]').value);
+
+      try {
+        const respuesta = await fetch("{% url 'registrar_asistencia' %}", {
+          method: 'POST',
+          body: datos
+        });
+        const json = await respuesta.json();
+        mensaje.textContent = json.mensaje;
+        mensaje.className = json.ok ? 'ok' : 'error';
+        if (json.ok) setTimeout(() => location.reload(), 1200);
+      } catch (err) {
+        mensaje.textContent = 'Error de conexión con el servidor.';
+        mensaje.className = 'error';
+      } finally {
+        btn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
