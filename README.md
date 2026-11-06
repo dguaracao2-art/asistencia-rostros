@@ -22,43 +22,62 @@ Proyecto académico de la asignatura Construcción de Software — Universidad E
 
 ## Instalación
 
-1. Clonar el repositorio: git clone https://github.com/USUARIO/asistencia-rostros.git
+Clonar el repositorio:
+
+```bash
+git clone https://github.com/dguaracao2-art/asistencia-rostros.git
 cd asistencia-rostros
+```
 
-2. Crear y activar el entorno virtual: python -m venv venv
+Crear y activar el entorno virtual:
+
+```bash
+python -m venv venv
 venv\Scripts\activate
+```
 
+Instalar las dependencias:
 
-3. Instalar las dependencias: pip install -r requirements.txt
+```bash
+pip install -r requirements.txt
+```
 
-4. Crear la base de datos en PostgreSQL:
-   ```sql
-   CREATE DATABASE asistencia_db;
-   ```
+Crear la base de datos en PostgreSQL:
 
-5. Configurar las credenciales en `config/settings.py`, dentro del bloque `DATABASES`.
+```sql
+CREATE DATABASE asistencia_db;
+```
 
-6. Aplicar las migraciones: python manage.py migrate
+Configurar las credenciales en `config/settings.py`, dentro del bloque `DATABASES`.
 
-7. Crear el usuario administrador: python manage.py createsuperuser
+Aplicar las migraciones y crear el usuario administrador:
 
-8. Ejecutar el servidor: python manage.py runserver
+```bash
+python manage.py migrate
+python manage.py createsuperuser
+```
 
-9. Abrir `http://127.0.0.1:8000/` en el navegador.
+Ejecutar el servidor y abrir `http://127.0.0.1:8000/`:
+
+```bash
+python manage.py runserver
+```
 
 ## Estructura del proyecto
+
+```
 asistencia-rostros/
-├── config/ Configuración general de Django
+├── config/                   Configuración general de Django
 ├── deteccion/
-│ ├── services/
-│ │ ├── camara.py Acceso único a la cámara
-│ │ └── detector.py Detección de rostros con OpenCV
-│ ├── templates/ Interfaz web
-│ ├── models.py Modelo Asistencia
-│ └── views.py Video en vivo y registro
+│   ├── services/
+│   │   ├── camara.py         Acceso único a la cámara
+│   │   └── detector.py       Detección de rostros con OpenCV
+│   ├── templates/            Interfaz web
+│   ├── models.py             Modelo Asistencia
+│   └── views.py              Video en vivo y registro
 ├── requirements.txt
 └── manage.py
-
+```
 
 ## Nota sobre la versión de OpenCV
 
@@ -72,4 +91,5 @@ El proyecto requiere OpenCV 4.x. La versión 5.0 eliminó `CascadeClassifier` de
 - Danny Ismael Guaraca Orozco
 - César Josué Cruz Neira
 
-**Docente:** Msc. Mariana Almache Sanisaca
+**Docente de la asignatura:** Ing. Rodrigo Josué Guevara Reyes  
+**Docente de la práctica:** Msc. Mariana Madeleine Almache Sanisaca
