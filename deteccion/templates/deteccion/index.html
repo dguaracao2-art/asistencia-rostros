@@ -8,96 +8,98 @@
     * { box-sizing: border-box; }
     body {
       font-family: system-ui, Arial, sans-serif;
-      background: #0f172a;
-      color: #e2e8f0;
-      margin: 0;
-      padding: 24px;
+      background: #0f172a; color: #e2e8f0; margin: 0; padding: 24px;
     }
     .contenedor { max-width: 960px; margin: 0 auto; }
     h1 { font-size: 24px; margin-bottom: 4px; }
+    h2 { font-size: 17px; margin: 0 0 12px; }
     .subtitulo { color: #94a3b8; font-size: 14px; margin-top: 0; }
-    .panel {
-      background: #1e293b;
-      border-radius: 12px;
-      padding: 20px;
-      margin-bottom: 20px;
-    }
-        #video {
-      width: 100%;
-      max-height: 420px;
-      object-fit: cover;
-      border-radius: 8px;
-      display: block;
-      background: #000;
+    .panel { background: #1e293b; border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+    #video {
+      width: 100%; max-height: 420px; object-fit: cover;
+      border-radius: 8px; display: block; background: #000;
     }
     form { display: flex; gap: 10px; margin-top: 16px; }
     input[type="text"] {
-      flex: 1;
-      padding: 12px;
-      font-size: 15px;
-      border: 1px solid #334155;
-      border-radius: 8px;
-      background: #0f172a;
-      color: #e2e8f0;
+      flex: 1; padding: 12px; font-size: 15px;
+      border: 1px solid #334155; border-radius: 8px;
+      background: #0f172a; color: #e2e8f0;
     }
     button {
-      padding: 12px 24px;
-      font-size: 15px;
-      font-weight: 600;
-      background: #2563eb;
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
+      padding: 12px 24px; font-size: 15px; font-weight: 600;
+      background: #2563eb; color: #fff; border: none;
+      border-radius: 8px; cursor: pointer;
     }
     button:hover { background: #1d4ed8; }
     button:disabled { background: #475569; cursor: not-allowed; }
-    #mensaje { min-height: 24px; margin-top: 12px; font-weight: 600; font-size: 14px; }
+    .secundario { background: #475569; }
+    .secundario:hover { background: #334155; }
+    .grande { width: 100%; margin-top: 16px; padding: 14px; font-size: 16px; }
+    .msg { min-height: 22px; margin-top: 12px; font-weight: 600; font-size: 14px; }
     .ok { color: #4ade80; }
     .error { color: #f87171; }
+    .pista { color: #94a3b8; font-size: 13px; margin: 0; }
     table { width: 100%; border-collapse: collapse; font-size: 14px; }
     th, td { padding: 10px; text-align: left; border-bottom: 1px solid #334155; }
     th { color: #94a3b8; font-weight: 600; text-transform: uppercase; font-size: 12px; }
     .contador {
-      display: inline-block;
-      background: #2563eb;
-      padding: 4px 12px;
-      border-radius: 999px;
-      font-size: 13px;
-      font-weight: 600;
+      display: inline-block; background: #2563eb; padding: 4px 12px;
+      border-radius: 999px; font-size: 13px; font-weight: 600;
+    }
+    .chip {
+      display: inline-block; background: #334155; padding: 4px 10px;
+      border-radius: 999px; font-size: 13px; margin: 0 6px 6px 0;
     }
   </style>
 </head>
 <body>
   <div class="contenedor">
-    <h1>Control de asistencia por detección de rostros</h1>
-        <p class="subtitulo">Registro automático de asistencia mediante visión por computadora</p>
+    <h1>Control de asistencia por reconocimiento de rostros</h1>
+    <p class="subtitulo">Registro automático de asistencia mediante visión por computadora</p>
 
     <div class="panel">
       <img id="video" src="{% url 'video_feed' %}" alt="Video en tiempo real">
 
-      <form id="form-asistencia">
-        {% csrf_token %}
-        <input type="text" id="nombre" placeholder="Nombre del estudiante" autocomplete="off" required>
-        <button type="submit" id="btn">Registrar asistencia</button>
-      </form>
-      <p id="mensaje"></p>
+      <button class="grande" id="btn-asistencia">Registrar mi asistencia</button>
+      <p class="msg" id="msg-asistencia"></p>
+            <p class="pista">
+        El sistema identifica automáticamente a la persona y verifica que sea un
+        ser humano real. Mira a la cámara y parpadea cuando se te solicite.
+      </p>
     </div>
 
     <div class="panel">
-      <h2 style="font-size:18px; margin-top:0;">
-        Registros recientes <span class="contador">{{ total_hoy }} hoy</span>
-      </h2>
+      <h2>Registrar una nueva persona</h2>
+      <p class="pista">
+        Se capturan 25 muestras del rostro. Mantente frente a la cámara y mueve
+        ligeramente la cabeza durante el proceso.
+      </p>
+      <form id="form-persona">
+        {% csrf_token %}
+        <input type="text" id="nombre" placeholder="Nombre completo" autocomplete="off" required>
+        <button type="submit" class="secundario" id="btn-persona">Capturar rostro</button>
+      </form>
+      <p class="msg" id="msg-persona"></p>
+
+      <div style="margin-top:12px;">
+        {% for p in personas %}
+          <span class="chip">{{ p.nombre }} · {{ p.muestras }} muestras</span>
+        {% empty %}
+          <span class="pista">Todavía no hay personas registradas.</span>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Registros recientes <span class="contador">{{ total_hoy }} hoy</span></h2>
       <table>
-        <tr>
-          <th>Nombre</th><th>Fecha</th><th>Hora</th><th>Rostros</th>
-        </tr>
+        <tr><th>Nombre</th><th>Fecha</th><th>Hora</th><th>Confianza</th></tr>
         {% for a in registros %}
         <tr>
-          <td>{{ a.nombre }}</td>
+          <td>{{ a.persona.nombre }}</td>
           <td>{{ a.fecha|date:"d/m/Y" }}</td>
           <td>{{ a.hora|time:"H:i:s" }}</td>
-          <td>{{ a.rostros_detectados }}</td>
+          <td>{{ a.confianza|floatformat:1 }}</td>
         </tr>
         {% empty %}
         <tr><td colspan="4" style="color:#94a3b8;">Sin registros todavía.</td></tr>
@@ -107,36 +109,44 @@
   </div>
 
   <script>
-    const form = document.getElementById('form-asistencia');
-    const mensaje = document.getElementById('mensaje');
-    const btn = document.getElementById('btn');
+    const csrf = () => document.querySelector('[name=csrfmiddlewaretoken]').value;
 
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      btn.disabled = true;
-      mensaje.textContent = 'Analizando...';
-      mensaje.className = '';
-
-      const datos = new FormData();
-      datos.append('nombre', document.getElementById('nombre').value);
-      datos.append('csrfmiddlewaretoken',
-        document.querySelector('[name=csrfmiddlewaretoken]').value);
-
+    async function enviar(url, datos, msgEl, btnEl, textoEspera) {
+      btnEl.disabled = true;
+      msgEl.textContent = textoEspera;
+      msgEl.className = 'msg';
       try {
-        const respuesta = await fetch("{% url 'registrar_asistencia' %}", {
-          method: 'POST',
-          body: datos
-        });
-        const json = await respuesta.json();
-        mensaje.textContent = json.mensaje;
-        mensaje.className = json.ok ? 'ok' : 'error';
-        if (json.ok) setTimeout(() => location.reload(), 1200);
-      } catch (err) {
-        mensaje.textContent = 'Error de conexión con el servidor.';
-        mensaje.className = 'error';
+        const r = await fetch(url, { method: 'POST', body: datos });
+        const j = await r.json();
+        msgEl.textContent = j.mensaje;
+        msgEl.className = 'msg ' + (j.ok ? 'ok' : 'error');
+        if (j.ok) setTimeout(() => location.reload(), 1500);
+      } catch (e) {
+        msgEl.textContent = 'Error de conexión con el servidor.';
+        msgEl.className = 'msg error';
       } finally {
-        btn.disabled = false;
+        btnEl.disabled = false;
       }
+    }
+
+    document.getElementById('btn-asistencia').addEventListener('click', () => {
+      const d = new FormData();
+      d.append('csrfmiddlewaretoken', csrf());
+      enviar("{% url 'registrar_asistencia' %}", d,
+             document.getElementById('msg-asistencia'),
+             document.getElementById('btn-asistencia'),
+                          'Verificando... mira a la cámara y parpadea.');
+    });
+
+    document.getElementById('form-persona').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const d = new FormData();
+      d.append('nombre', document.getElementById('nombre').value);
+      d.append('csrfmiddlewaretoken', csrf());
+      enviar("{% url 'registrar_persona' %}", d,
+             document.getElementById('msg-persona'),
+             document.getElementById('btn-persona'),
+             'Capturando muestras, no te muevas de la cámara...');
     });
   </script>
 </body>
